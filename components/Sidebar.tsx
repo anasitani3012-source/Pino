@@ -2,7 +2,11 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isPro?: boolean;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isPro = false }) => {
   const location = useLocation();
 
   const navItems = [
@@ -11,6 +15,7 @@ const Sidebar: React.FC = () => {
     { path: '/live', label: 'Live Talk', icon: 'fa-comment-dots' },
     { path: '/hub', label: 'Study Hub', icon: 'fa-book-bookmark' },
     { path: '/studio', label: 'Studio', icon: 'fa-wand-magic-sparkles' },
+    { path: '/pro', label: 'Pricing', icon: 'fa-crown', highlight: true },
   ];
 
   return (
@@ -36,10 +41,12 @@ const Sidebar: React.FC = () => {
                 className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
                   isActive 
                     ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]' 
-                    : 'text-gray-500 hover:text-white hover:bg-white/5'
+                    : item.highlight 
+                      ? 'text-amber-400 hover:bg-amber-400/5' 
+                      : 'text-gray-500 hover:text-white hover:bg-white/5'
                 }`}
               >
-                <i className={`fas ${item.icon} w-5 text-lg ${isActive ? 'text-blue-400' : ''}`}></i>
+                <i className={`fas ${item.icon} w-5 text-lg ${isActive ? 'text-blue-400' : item.highlight ? 'text-amber-500' : ''}`}></i>
                 <span className="font-semibold">{item.label}</span>
               </Link>
             );
@@ -47,17 +54,17 @@ const Sidebar: React.FC = () => {
         </nav>
 
         <div className="mt-auto pt-6 border-t border-gray-800/50">
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-gray-900 to-black border border-gray-800">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500">
-                <i className="fas fa-bolt text-xs"></i>
+          <Link to="/pro" className="group block p-4 rounded-2xl bg-gradient-to-br from-gray-900 to-black border border-gray-800 hover:border-amber-500/50 transition-all">
+            <div className="flex items-center gap-3 mb-2">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-amber-500 ${isPro ? 'bg-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.3)]' : 'bg-amber-500/20'}`}>
+                <i className="fas fa-crown text-xs"></i>
               </div>
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Pino Core</span>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{isPro ? 'Pino Pro' : 'Pino Free'}</span>
             </div>
-            <p className="text-[10px] text-gray-500 leading-relaxed">
-              Autonomous mode active. Powered by Gemini 3.
+            <p className="text-[10px] text-amber-500 font-bold group-hover:underline">
+              {isPro ? 'Manage subscription' : 'Upgrade for full features'}
             </p>
-          </div>
+          </Link>
         </div>
       </div>
 
@@ -69,7 +76,7 @@ const Sidebar: React.FC = () => {
             <Link
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-blue-500' : 'text-gray-500'}`}
+              className={`flex flex-col items-center gap-1 transition-colors ${isActive ? 'text-blue-500' : item.highlight ? 'text-amber-500' : 'text-gray-500'}`}
             >
               <i className={`fas ${item.icon} text-xl`}></i>
               <span className="text-[10px] font-bold uppercase tracking-tighter">{item.label}</span>

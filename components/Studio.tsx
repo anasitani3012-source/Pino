@@ -1,6 +1,5 @@
 
 import React, { useState, useRef } from 'react';
-import { GoogleGenAI } from '@google/genai';
 import { generatePodcastScript, generateAudio, generateBrainrotVideo, generateImage } from '../services/geminiService';
 import { decode, decodeAudioData } from '../utils/audio';
 
@@ -20,9 +19,15 @@ const Studio: React.FC = () => {
 
   const checkApiKey = async () => {
     // @ts-ignore
-    if (window.aistudio && !(await window.aistudio.hasSelectedApiKey())) {
+    if (window.aistudio) {
       // @ts-ignore
-      await window.aistudio.openSelectKey();
+      const hasKey = await window.aistudio.hasSelectedApiKey();
+      if (!hasKey) {
+        // @ts-ignore
+        await window.aistudio.openSelectKey();
+        // Mandatory guideline: MUST assume the key selection was successful after triggering openSelectKey()
+        return true;
+      }
     }
     return true;
   };
@@ -39,7 +44,7 @@ const Studio: React.FC = () => {
         setGeneratedAudio(audioData);
         setStatus('Podcast production complete!');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       setStatus('Error in audio engine.');
     } finally {
@@ -60,7 +65,14 @@ const Studio: React.FC = () => {
       setStatus('Video successfully rendered!');
     } catch (error: any) {
       console.error(error);
-      setStatus('Video generation failed.');
+      // Handling mandatory guideline for specific error reset
+      if (error?.message?.includes('Requested entity was not found')) {
+        setStatus('Key invalid or project not found. Resetting...');
+        // @ts-ignore
+        if (window.aistudio) await window.aistudio.openSelectKey();
+      } else {
+        setStatus('Video generation failed.');
+      }
     } finally {
       setLoading(false);
     }
@@ -73,11 +85,21 @@ const Studio: React.FC = () => {
     try {
       await checkApiKey();
       const url = await generateImage(content, imgSize);
-      setGeneratedImg(url);
-      setStatus('Image ready!');
-    } catch (error) {
+      if (url) {
+        setGeneratedImg(url);
+        setStatus('Image ready!');
+      } else {
+        setStatus('No image generated.');
+      }
+    } catch (error: any) {
       console.error(error);
-      setStatus('Image generation failed.');
+      if (error?.message?.includes('Requested entity was not found')) {
+        setStatus('Key invalid or project not found. Resetting...');
+        // @ts-ignore
+        if (window.aistudio) await window.aistudio.openSelectKey();
+      } else {
+        setStatus('Image generation failed.');
+      }
     } finally {
       setLoading(false);
     }
@@ -103,6 +125,10 @@ const Studio: React.FC = () => {
       <div className="mb-10 text-center md:text-left">
         <h1 className="text-4xl font-black tracking-tight mb-2">Creation Studio</h1>
         <p className="text-gray-400">Convert text into professional audio, viral video, or high-res images.</p>
+        <p className="text-[10px] text-amber-500 font-bold uppercase tracking-widest mt-2">
+          Note: High-quality models require a paid API key. 
+          <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="underline ml-1">View Billing Docs</a>
+        </p>
       </div>
 
       <div className="bg-[#111] border border-gray-800 rounded-[2.5rem] p-8 md:p-10 mb-12 shadow-2xl relative overflow-hidden group">
@@ -119,7 +145,7 @@ const Studio: React.FC = () => {
              <button 
               onClick={handleGeneratePodcast}
               disabled={loading}
-              className="w-full py-4 bg-orange-600 hover:bg-orange-500 rounded-2xl font-black text-white flex items-center justify-center gap-3 transition-all disabled:opacity-50 uppercase tracking-widest text-xs"
+              className="w-full py-4 bg-orange-600 hover:bg-orange-500 rounded-2xl font-black text-white flex items-center justify-center gap-3 transition-all disabled:opacity-50 uppercase tracking-widest text-xs active-scale"
             >
               <i className="fas fa-podcast"></i> Podcast
             </button>
@@ -129,7 +155,7 @@ const Studio: React.FC = () => {
              <button 
               onClick={handleGenerateVideo}
               disabled={loading}
-              className="w-full py-4 bg-pink-600 hover:bg-pink-500 rounded-2xl font-black text-white flex items-center justify-center gap-3 transition-all disabled:opacity-50 uppercase tracking-widest text-xs"
+              className="w-full py-4 bg-pink-600 hover:bg-pink-500 rounded-2xl font-black text-white flex items-center justify-center gap-3 transition-all disabled:opacity-50 uppercase tracking-widest text-xs active-scale"
             >
               <i className="fas fa-play"></i> Veo Video
             </button>
@@ -143,7 +169,7 @@ const Studio: React.FC = () => {
              <button 
               onClick={handleGenerateImage}
               disabled={loading}
-              className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-2xl font-black text-white flex items-center justify-center gap-3 transition-all disabled:opacity-50 uppercase tracking-widest text-xs"
+              className="w-full py-4 bg-blue-600 hover:bg-blue-500 rounded-2xl font-black text-white flex items-center justify-center gap-3 transition-all disabled:opacity-50 uppercase tracking-widest text-xs active-scale"
             >
               <i className="fas fa-image"></i> Pro Image
             </button>
@@ -167,7 +193,7 @@ const Studio: React.FC = () => {
         {/* Audio Output */}
         <div className="bg-[#0a0a0a] border border-gray-800 rounded-[2.5rem] p-8 flex flex-col items-center justify-center min-h-[300px] shadow-xl">
           {generatedAudio ? (
-            <button onClick={playAudio} className="w-full aspect-square bg-orange-600/10 rounded-full flex flex-col items-center justify-center border border-orange-500/20 hover:bg-orange-600/20 transition-all">
+            <button onClick={playAudio} className="w-full aspect-square bg-orange-600/10 rounded-full flex flex-col items-center justify-center border border-orange-500/20 hover:bg-orange-600/20 transition-all active-scale">
               <i className="fas fa-headphones text-4xl text-orange-500 mb-2"></i>
               <span className="text-xs font-black uppercase text-orange-500">Play Podcast</span>
             </button>

@@ -3,21 +3,29 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Message } from "../types";
 
 // Create a fresh instance for each request to ensure the latest API key is used
-const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getAI = () => {
+  if (!process.env.API_KEY) {
+    console.warn("[Pino] API_KEY missing in environment variables");
+  }
+  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+};
 
 export const generateSummary = async (content: string) => {
+  console.debug("[Pino] Calling gemini-3-flash-preview for summary generation");
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: `Please summarize the following content concisely but thoroughly: ${content}`,
   });
+  console.debug("[Pino] Summary received, length:", response.text?.length);
   return response.text;
 };
 
 export const generateFlashcards = async (content: string) => {
+  console.debug("[Pino] Calling gemini-3-pro-preview for flashcard generation");
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview', // Pro for complex JSON structure generation
+    model: 'gemini-3-pro-preview',
     contents: `Based on this content: "${content}", generate a JSON array of 5-10 flashcards. Each card must have a "front" (question/concept) and "back" (answer/definition).`,
     config: {
       responseMimeType: "application/json",
@@ -38,9 +46,10 @@ export const generateFlashcards = async (content: string) => {
 };
 
 export const generateQuiz = async (content: string) => {
+  console.debug("[Pino] Calling gemini-3-pro-preview for quiz generation");
   const ai = getAI();
   const response = await ai.models.generateContent({
-    model: 'gemini-3-pro-preview', // Pro for complex JSON structure generation
+    model: 'gemini-3-pro-preview',
     contents: `Based on this content: "${content}", generate a JSON array of 5 multiple choice quiz questions. Each question must have a "question", "options" (array of 4 strings), and "correctAnswer" (index 0-3).`,
     config: {
       responseMimeType: "application/json",
@@ -64,8 +73,8 @@ export const generateQuiz = async (content: string) => {
   return JSON.parse(response.text || '[]');
 };
 
-// Added generatePodcastScript for Studio component
 export const generatePodcastScript = async (content: string) => {
+  console.debug("[Pino] Calling gemini-3-pro-preview for podcast script generation");
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: 'gemini-3-pro-preview',
@@ -81,6 +90,7 @@ export const generatePodcastScript = async (content: string) => {
 };
 
 export const generateImage = async (prompt: string, size: "1K" | "2K" | "4K" = "1K") => {
+  console.debug(`[Pino] Calling gemini-3-pro-image-preview for ${size} image generation`);
   const ai = getAI();
   const response = await ai.models.generateContent({
     model: 'gemini-3-pro-image-preview',
@@ -95,6 +105,7 @@ export const generateImage = async (prompt: string, size: "1K" | "2K" | "4K" = "
 
   for (const part of response.candidates[0].content.parts) {
     if (part.inlineData) {
+      console.debug("[Pino] Image binary received successfully");
       return `data:image/png;base64,${part.inlineData.data}`;
     }
   }
@@ -102,6 +113,7 @@ export const generateImage = async (prompt: string, size: "1K" | "2K" | "4K" = "
 };
 
 export const generateBrainrotVideo = async (prompt: string, aspectRatio: '16:9' | '9:16' = '9:16') => {
+  console.debug(`[Pino] Initiating veo-3.1-fast-generate-preview with aspect ${aspectRatio}`);
   const ai = getAI();
   let operation = await ai.models.generateVideos({
     model: 'veo-3.1-fast-generate-preview',
@@ -114,20 +126,22 @@ export const generateBrainrotVideo = async (prompt: string, aspectRatio: '16:9' 
   });
   
   while (!operation.done) {
+    console.debug("[Pino] Video rendering in progress...");
     await new Promise(resolve => setTimeout(resolve, 10000));
     operation = await ai.operations.getVideosOperation({ operation: operation });
   }
 
+  console.debug("[Pino] Video generation complete, fetching MP4 body");
   const downloadLink = operation.response?.generatedVideos?.[0]?.video?.uri;
   const response = await fetch(`${downloadLink}&key=${process.env.API_KEY}`);
   return response.blob();
 };
 
 export const generateAudio = async (text: string) => {
+  console.debug("[Pino] Calling gemini-2.5-flash-preview-tts");
   const ai = getAI();
   const isDialogue = text.includes('Joe:') && text.includes('Jane:');
 
-  // Configure multi-speaker if dialogue is detected
   const speechConfig = isDialogue ? {
     multiSpeakerVoiceConfig: {
       speakerVoiceConfigs: [
@@ -158,17 +172,15 @@ export const generateAudio = async (text: string) => {
   return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
 };
 
-// Fixed signature to accept query and history array
 export const agentTask = async (query: string, history: Message[] = []) => {
+  console.debug("[Pino] Calling gemini-3-flash-preview for agent task with history length:", history.length);
   const ai = getAI();
   
-  // Transform app-specific message type to Gemini contents format
   const contents = history.map(m => ({
     role: m.role,
     parts: [{ text: m.text }]
   }));
   
-  // Add current user query to the contents array
   contents.push({
     role: 'user',
     parts: [{ text: query }]
@@ -178,7 +190,7 @@ export const agentTask = async (query: string, history: Message[] = []) => {
     model: 'gemini-3-flash-preview',
     contents: contents,
     config: {
-      tools: [{ googleSearch: {} }] // Mandatory search grounding
+      tools: [{ googleSearch: {} }]
     }
   });
 
