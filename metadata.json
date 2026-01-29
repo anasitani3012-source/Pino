@@ -1,0 +1,8 @@
+{
+  "name": "Pino",
+  "description": "An autonomous AI task agent and study hub that transforms notes, PDFs, and YouTube links into flashcards, quizzes, AI podcasts, and brainrot videos.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
