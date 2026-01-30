@@ -21,6 +21,7 @@ const LiveConversation: React.FC = () => {
     }
     setIsActive(false);
     setStatus('Ended');
+    sourcesRef.current.forEach(s => { try { s.stop(); } catch(e){} });
   };
 
   const startConversation = async () => {
@@ -39,7 +40,7 @@ const LiveConversation: React.FC = () => {
         model: 'gemini-2.5-flash-native-audio-preview-12-2025',
         callbacks: {
           onopen: () => {
-            setStatus('Listening...');
+            setStatus('Active');
             const source = audioContextInRef.current!.createMediaStreamSource(stream);
             const scriptProcessor = audioContextInRef.current!.createScriptProcessor(4096, 1, 1);
             
@@ -62,12 +63,10 @@ const LiveConversation: React.FC = () => {
           },
           onmessage: async (message: LiveServerMessage) => {
             if (message.serverContent?.inputTranscription) {
-               const text = message.serverContent.inputTranscription.text;
-               setTranscriptions(prev => [...prev, { role: 'You', text }]);
+               setTranscriptions(prev => [...prev, { role: 'You', text: message.serverContent!.inputTranscription!.text }]);
             }
             if (message.serverContent?.outputTranscription) {
-               const text = message.serverContent.outputTranscription.text;
-               setTranscriptions(prev => [...prev, { role: 'Pino', text }]);
+               setTranscriptions(prev => [...prev, { role: 'Pino', text: message.serverContent!.outputTranscription!.text }]);
             }
 
             const audioData = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
@@ -85,18 +84,18 @@ const LiveConversation: React.FC = () => {
             }
 
             if (message.serverContent?.interrupted) {
-              sourcesRef.current.forEach(s => s.stop());
+              sourcesRef.current.forEach(s => { try { s.stop(); } catch(e){} });
               sourcesRef.current.clear();
               nextStartTimeRef.current = 0;
             }
           },
-          onerror: (e) => console.error('Live Error:', e),
+          onerror: (e) => setStatus('Error'),
           onclose: () => setIsActive(false),
         },
         config: {
           responseModalities: [Modality.AUDIO],
           speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } } },
-          systemInstruction: 'You are Pino, a helpful and witty autonomous AI voice agent.',
+          systemInstruction: 'You are Pino, an autonomous voice agent. Keep responses natural and brief.',
           inputAudioTranscription: {},
           outputAudioTranscription: {}
         }
@@ -104,47 +103,40 @@ const LiveConversation: React.FC = () => {
 
       sessionRef.current = await sessionPromise;
     } catch (err) {
-      console.error(err);
-      setStatus('Error');
+      setStatus('Failed');
       setIsActive(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto h-full flex flex-col">
+    <div className="max-w-4xl mx-auto h-full flex flex-col pb-20 md:pb-0">
       <div className="mb-8">
         <h1 className="text-4xl font-black tracking-tight mb-2">Live Talk</h1>
-        <p className="text-gray-400">Real-time voice conversation with Pino.</p>
+        <p className="text-gray-400">Low-latency autonomous voice interaction.</p>
       </div>
 
-      <div className="flex-1 bg-[#111] border border-gray-800 rounded-[2.5rem] p-8 flex flex-col items-center justify-center relative overflow-hidden">
-        <div className={`w-48 h-48 rounded-full flex items-center justify-center transition-all duration-500 ${isActive ? 'bg-blue-600/20 scale-110 shadow-[0_0_80px_rgba(37,99,235,0.2)]' : 'bg-gray-800'}`}>
-          <i className={`fas fa-microphone text-6xl ${isActive ? 'text-blue-500 animate-pulse' : 'text-gray-600'}`}></i>
+      <div className="flex-1 bg-[#111] border border-gray-800 rounded-[2.5rem] p-8 flex flex-col items-center justify-center relative overflow-hidden shadow-2xl">
+        <div className={`w-40 h-40 rounded-full flex items-center justify-center transition-all duration-700 ${isActive ? 'bg-blue-600/20 scale-110 shadow-[0_0_100px_rgba(37,99,235,0.3)]' : 'bg-gray-800'}`}>
+          <div className={`w-12 h-12 bg-white rounded-full ${isActive ? 'animate-ping' : ''}`}></div>
         </div>
         
-        <p className="mt-8 text-xl font-bold text-gray-300">{status}</p>
+        <p className="mt-8 text-2xl font-black text-white uppercase tracking-widest">{status}</p>
 
-        <div className="mt-12 flex gap-4">
+        <div className="mt-10 flex gap-4">
           {!isActive ? (
-            <button 
-              onClick={startConversation}
-              className="px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-500/20"
-            >
-              Start Session
-            </button>
+            <button onClick={startConversation} className="px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-600/20 active:scale-95">Connect</button>
           ) : (
-            <button 
-              onClick={stopConversation}
-              className="px-10 py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest transition-all"
-            >
-              Stop Session
-            </button>
+            <button onClick={stopConversation} className="px-10 py-4 bg-red-600 hover:bg-red-500 text-white rounded-2xl font-black uppercase tracking-widest transition-all active:scale-95">Disconnect</button>
           )}
         </div>
 
-        <div className="mt-12 w-full max-w-md h-40 overflow-y-auto custom-scrollbar space-y-2 px-4">
+        <div className="mt-12 w-full max-w-lg h-48 overflow-y-auto custom-scrollbar bg-black/30 rounded-2xl p-6 border border-gray-800/50">
+          {transcriptions.length === 0 && <p className="text-center text-[10px] text-gray-600 uppercase font-black tracking-widest">Awaiting interaction...</p>}
           {transcriptions.map((t, i) => (
-            <p key={i} className="text-sm"><span className="font-bold text-blue-400">{t.role}:</span> <span className="text-gray-400">{t.text}</span></p>
+            <div key={i} className="mb-3 animate-in fade-in slide-in-from-bottom-1">
+               <span className={`text-[10px] font-black uppercase mr-2 ${t.role === 'Pino' ? 'text-blue-500' : 'text-gray-500'}`}>{t.role}:</span>
+               <span className="text-sm text-gray-300">{t.text}</span>
+            </div>
           ))}
         </div>
       </div>

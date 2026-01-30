@@ -1,17 +1,17 @@
 
 {
   "short_name": "Pino",
-  "name": "Pino: Autonomous AI Agent",
-  "description": "Your autonomous AI task agent and high-performance study hub.",
+  "name": "Pino: Intelligence Evolved",
+  "description": "Your autonomous AI task agent and evolved performance study hub.",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2592/2592201.png",
+      "src": "https://img.icons8.com/color/512/pineapple.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2592/2592201.png",
+      "src": "https://img.icons8.com/color/512/pineapple.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
@@ -26,7 +26,7 @@
   "categories": ["education", "productivity", "utilities"],
   "screenshots": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2592/2592201.png",
+      "src": "https://img.icons8.com/color/512/pineapple.png",
       "sizes": "512x512",
       "type": "image/png",
       "label": "Home Dashboard"

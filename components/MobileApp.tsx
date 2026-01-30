@@ -29,33 +29,35 @@ const MobileApp: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto py-10 page-transition">
       <div className="text-center mb-12">
-        <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-blue-500/20">
-          <span className="text-4xl font-black text-white">P</span>
+        <div className="w-28 h-28 brand-bg rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-cyan-500/20 pineapple-logo relative group overflow-hidden">
+          <i className="fas fa-pineapple text-5xl text-white relative z-10 transition-transform group-hover:rotate-12"></i>
+          <div className="absolute inset-0 bg-white/5 animate-pulse"></div>
         </div>
-        <h1 className="text-4xl font-black tracking-tight mb-4">Pino Mobile</h1>
-        <p className="text-gray-400">The Store-Ready autonomous experience.</p>
+        <h1 className="text-4xl font-black tracking-tight mb-4 brand-text">Pino Evolved</h1>
+        <p className="text-gray-400 font-medium">The Native Store-Ready autonomous experience.</p>
       </div>
 
       <div className="space-y-6">
-        <div className="bg-[#111] border border-gray-800 rounded-[2.5rem] p-8">
-          <h2 className="text-xl font-bold mb-6 flex items-center gap-3">
-            <i className="fas fa-check-circle text-green-500"></i>
-            Native Features Enabled
+        <div className="bg-[#111] border border-gray-800 rounded-[2.5rem] p-8 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 brand-bg opacity-[0.03] blur-3xl"></div>
+          <h2 className="text-xl font-black mb-8 flex items-center gap-3 uppercase tracking-tighter">
+            <i className="fas fa-check-circle text-cyan-500"></i>
+            Evolved Capabilities
           </h2>
-          <ul className="space-y-4">
+          <ul className="space-y-6">
             {[
-              { icon: 'fa-bolt', text: 'Instant App Launch', sub: 'Zero loading state after first run' },
-              { icon: 'fa-bell', text: 'Push Notifications', sub: 'Get notified when tasks complete' },
-              { icon: 'fa-shield-halved', text: 'Secure Biometric Lock', sub: 'Protect your study materials' },
-              { icon: 'fa-wifi-slash', text: 'Offline Mastery', sub: 'Access your library without data' }
+              { icon: 'fa-bolt', text: 'Neural App Launch', sub: 'Instantaneous activation via PWA tech' },
+              { icon: 'fa-bell', text: 'Cognitive Alerts', sub: 'Deeply integrated push notifications' },
+              { icon: 'fa-shield-halved', text: 'Biometric Firewall', sub: 'Native-level security for your data' },
+              { icon: 'fa-wifi-slash', text: 'Distributed Offline Mode', sub: 'Library access anywhere, anytime' }
             ].map((f, i) => (
-              <li key={i} className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center shrink-0">
-                  <i className={`fas ${f.icon} text-blue-500`}></i>
+              <li key={i} className="flex items-start gap-5">
+                <div className="w-12 h-12 rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center shrink-0 shadow-inner">
+                  <i className={`fas ${f.icon} brand-text text-xl`}></i>
                 </div>
                 <div>
-                  <p className="font-bold text-gray-200">{f.text}</p>
-                  <p className="text-xs text-gray-500">{f.sub}</p>
+                  <p className="font-black text-gray-200 uppercase tracking-tight text-sm">{f.text}</p>
+                  <p className="text-xs text-gray-500 font-medium mt-1">{f.sub}</p>
                 </div>
               </li>
             ))}
@@ -63,33 +65,23 @@ const MobileApp: React.FC = () => {
         </div>
 
         {isInstalled ? (
-          <div className="p-6 bg-green-500/10 border border-green-500/30 rounded-3xl text-center">
-            <p className="text-green-500 font-bold">Successfully Installed in Native Mode</p>
+          <div className="p-8 bg-cyan-500/10 border border-cyan-500/30 rounded-[2rem] text-center shadow-inner">
+            <p className="text-cyan-400 font-black uppercase tracking-widest text-xs">Evolved Instance Successfully Installed</p>
           </div>
         ) : (
           <div className="space-y-4">
             <button 
               onClick={handleInstall}
-              className="w-full py-5 bg-white text-black font-black rounded-3xl active-scale transition-all flex items-center justify-center gap-3"
+              className="w-full py-6 bg-white text-black font-black rounded-[2rem] active-scale transition-all flex items-center justify-center gap-4 shadow-2xl hover:bg-gray-100"
             >
-              <i className="fas fa-download"></i> Install Pino Now
+              <i className="fas fa-pineapple text-xl"></i> 
+              <span className="uppercase tracking-widest text-sm">Download Evolution</span>
             </button>
-            <p className="text-center text-[10px] text-gray-600 uppercase tracking-widest font-black">
-              Available for Android & iOS via Web-to-Native technology
+            <p className="text-center text-[10px] text-gray-600 uppercase tracking-[0.3em] font-black mt-4">
+              Cross-Platform Native Deployment Ready
             </p>
           </div>
         )}
-
-        <div className="grid grid-cols-2 gap-4 mt-8">
-           <div className="p-4 bg-[#111] border border-gray-800 rounded-2xl text-center grayscale opacity-50">
-             <i className="fab fa-google-play text-2xl mb-2"></i>
-             <p className="text-[10px] font-bold">Play Store Build</p>
-           </div>
-           <div className="p-4 bg-[#111] border border-gray-800 rounded-2xl text-center grayscale opacity-50">
-             <i className="fab fa-apple text-2xl mb-2"></i>
-             <p className="text-[10px] font-bold">App Store Build</p>
-           </div>
-        </div>
       </div>
     </div>
   );

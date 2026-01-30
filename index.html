@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Pino - Autonomous AI Agent</title>
+  <title>Pino - Intelligence Evolved</title>
   
   <!-- PWA & Mobile Meta Tags -->
   <meta name="theme-color" content="#0a0a0a">
@@ -14,10 +14,10 @@
   <meta name="apple-mobile-web-app-title" content="Pino">
   
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2592/2592201.png">
+  <link rel="apple-touch-icon" href="https://img.icons8.com/color/512/pineapple.png">
   
-  <!-- Splash Screens for iOS (Generic Example) -->
-  <link rel="apple-touch-startup-image" href="https://cdn-icons-png.flaticon.com/512/2592/2592201.png">
+  <!-- Splash Screens for iOS -->
+  <link rel="apple-touch-startup-image" href="https://img.icons8.com/color/512/pineapple.png">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -28,6 +28,7 @@
       --sar: env(safe-area-inset-right);
       --sab: env(safe-area-inset-bottom);
       --sal: env(safe-area-inset-left);
+      --brand-gradient: linear-gradient(135deg, #00d2ff 0%, #9d50bb 100%);
     }
     body {
       font-family: 'Inter', sans-serif;
@@ -37,6 +38,14 @@
       overscroll-behavior: none;
       padding-top: var(--sat);
       padding-bottom: var(--sab);
+    }
+    .brand-text {
+      background: var(--brand-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .brand-bg {
+      background: var(--brand-gradient);
     }
     .custom-scrollbar::-webkit-scrollbar {
       width: 4px;
@@ -48,7 +57,6 @@
       background: #1f2937;
       border-radius: 10px;
     }
-    /* Native App Animation Styles */
     .page-transition {
       animation: slideIn 0.3s ease-out;
     }
@@ -56,9 +64,11 @@
       from { transform: translateY(10px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
-    /* Active touch state for mobile */
     .active-scale:active {
       transform: scale(0.96);
+    }
+    .pineapple-logo {
+      filter: drop-shadow(0 0 8px rgba(0, 210, 255, 0.4));
     }
   </style>
 <script type="importmap">

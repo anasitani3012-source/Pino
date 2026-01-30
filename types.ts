@@ -5,7 +5,16 @@ export enum TaskType {
   QUIZ = 'QUIZ',
   PODCAST = 'PODCAST',
   VIDEO = 'VIDEO',
-  AGENT = 'AGENT'
+  AGENT = 'AGENT',
+  SLIDES = 'SLIDES',
+  CODE = 'CODE'
+}
+
+export interface User {
+  id: string;
+  email: string;
+  isPro: boolean;
+  name: string;
 }
 
 export interface StudyMaterial {
@@ -32,4 +41,6 @@ export interface Message {
   role: 'user' | 'model';
   text: string;
   timestamp: number;
+  type?: 'text' | 'slides' | 'code';
+  data?: any;
 }
